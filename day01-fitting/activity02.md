@@ -1,6 +1,45 @@
 Activity 2
 ================
 
+``` r
+library(tidyverse)
+```
+
+    ## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+    ## ✔ dplyr     1.1.2     ✔ readr     2.1.5
+    ## ✔ forcats   1.0.0     ✔ stringr   1.5.1
+    ## ✔ ggplot2   3.4.4     ✔ tibble    3.2.1
+    ## ✔ lubridate 1.9.2     ✔ tidyr     1.3.0
+    ## ✔ purrr     1.0.2     
+    ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ✖ dplyr::filter() masks stats::filter()
+    ## ✖ dplyr::lag()    masks stats::lag()
+    ## ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
+
+``` r
+library(tidymodels)
+```
+
+    ## ── Attaching packages ────────────────────────────────────── tidymodels 1.1.1 ──
+    ## ✔ broom        1.0.5     ✔ rsample      1.2.0
+    ## ✔ dials        1.2.0     ✔ tune         1.1.2
+    ## ✔ infer        1.0.4     ✔ workflows    1.1.3
+    ## ✔ modeldata    1.3.0     ✔ workflowsets 1.0.1
+    ## ✔ parsnip      1.1.1     ✔ yardstick    1.2.0
+    ## ✔ recipes      1.0.9     
+    ## ── Conflicts ───────────────────────────────────────── tidymodels_conflicts() ──
+    ## ✖ scales::discard() masks purrr::discard()
+    ## ✖ dplyr::filter()   masks stats::filter()
+    ## ✖ recipes::fixed()  masks stringr::fixed()
+    ## ✖ dplyr::lag()      masks stats::lag()
+    ## ✖ yardstick::spec() masks readr::spec()
+    ## ✖ recipes::step()   masks stats::step()
+    ## • Use suppressPackageStartupMessages() to eliminate package startup messages
+
+``` r
+library(readr)
+```
+
 ### A typical modeling process
 
 The process that we will use for today’s activity is:
@@ -41,14 +80,20 @@ text](https://emilhvitfeldt.github.io/ISLR-tidymodels-labs/index.html).
   install.packages("package_name")
   ```
 
+``` r
+install.packages("tidyverse")
+install.packages("tidy")
+```
+
 - Once you have verified that both `{tidyverse}` and `{tidymodels}` are
   installed, load these packages in the R chunk below titled `setup`.
   That is, type the following:
 
-  ``` r
-  library(tidyverse)
-  library(tidymodels)
-  ```
+``` r
+library(tidyverse)
+library(tidymodels)
+library(ggplot2)
+```
 
 - Run the `setup` code chunk and/or **knit**
   <img src="../README-img/knit-icon.png" alt="knit" width = "20"/> icon
@@ -88,6 +133,40 @@ that does the following:
 - Filter the data `hfi` data frame for year 2016, and
 - Assigns the result to a data frame named `hfi_2016`.
 
+``` r
+data <- read_csv("hfi.csv")
+```
+
+    ## Rows: 1458 Columns: 123
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## chr   (3): ISO_code, countries, region
+    ## dbl (120): year, pf_rol_procedural, pf_rol_civil, pf_rol_criminal, pf_rol, p...
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
+head(data)
+```
+
+    ## # A tibble: 6 × 123
+    ##    year ISO_code countries region pf_rol_procedural pf_rol_civil pf_rol_criminal
+    ##   <dbl> <chr>    <chr>     <chr>              <dbl>        <dbl>           <dbl>
+    ## 1  2016 ALB      Albania   Easte…              6.66         4.55            4.67
+    ## 2  2016 DZA      Algeria   Middl…             NA           NA              NA   
+    ## 3  2016 AGO      Angola    Sub-S…             NA           NA              NA   
+    ## 4  2016 ARG      Argentina Latin…              7.10         5.79            4.34
+    ## 5  2016 ARM      Armenia   Cauca…             NA           NA              NA   
+    ## 6  2016 AUS      Australia Ocean…              8.44         7.53            7.36
+    ## # ℹ 116 more variables: pf_rol <dbl>, pf_ss_homicide <dbl>,
+    ## #   pf_ss_disappearances_disap <dbl>, pf_ss_disappearances_violent <dbl>,
+    ## #   pf_ss_disappearances_organized <dbl>,
+    ## #   pf_ss_disappearances_fatalities <dbl>, pf_ss_disappearances_injuries <dbl>,
+    ## #   pf_ss_disappearances <dbl>, pf_ss_women_fgm <dbl>,
+    ## #   pf_ss_women_missing <dbl>, pf_ss_women_inheritance_widows <dbl>,
+    ## #   pf_ss_women_inheritance_daughters <dbl>, pf_ss_women_inheritance <dbl>, …
+
 ### 1. Identify our research question(s)
 
 The research question is often defined by you (or your company, boss,
@@ -110,10 +189,36 @@ the following tasks.
     plot to display the distribution of the political pressures and
     controls on media content index, `pf_expression_control`?
 
+``` r
+# Histogram for personal freedom scores
+hist(data$pf_score, main = "Distribution of Personal Freedom Scores", xlab = "Personal Freedom Scores")
+```
+
+![](activity02_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+
 - In the R code chunk below titled `univariable-plots`, type the R code
   that displays this plot for `pf_score`.
 - In the R code chunk below titled `univariable-plots`, type the R code
   that displays this plot for `pf_expression_control`.
+
+``` r
+# Distribution plot for pf_score (Histogram)
+hist(data$pf_score, main = "Distribution of Personal Freedom Scores", xlab = "Personal Freedom Scores")
+```
+
+![](activity02_files/figure-gfm/distribution-plots-1.png)<!-- -->
+
+``` r
+# Distribution plot for pf_expression_control (Kernel Density Plot)
+ggplot(data, aes(x = pf_expression_control)) + 
+  geom_density() + 
+  ggtitle("Distribution of Political Expression Control") + 
+  xlab("Political Expression Control")
+```
+
+    ## Warning: Removed 80 rows containing non-finite values (`stat_density()`).
+
+![](activity02_files/figure-gfm/distribution-plots-2.png)<!-- -->
 
 4.  Comment on each of these two distributions. Be sure to describe
     their centers, spread, shape, and any potential outliers.
@@ -126,11 +231,27 @@ the following tasks.
   relationship using the variable `pf_expression_control` as the
   predictor/explanatory variable.
 
+``` r
+# Scatter plot for the relationship between pf_score and pf_expression_control
+ggplot(data, aes(x = pf_expression_control, y = pf_score)) +
+  geom_point() +
+  ggtitle("Relationship between Personal Freedom Score and Political Expression Control") +
+  xlab("Political Expression Control") +
+  ylab("Personal Freedom Score")
+```
+
+    ## Warning: Removed 80 rows containing missing values (`geom_point()`).
+
+![](activity02_files/figure-gfm/relationship-plot-1.png)<!-- -->
+
 4.  Does the relationship look linear? If you knew a country’s
     `pf_expression_control`, or its score out of 10, with 0 being the
     most, of political pressures and controls on media content, would
     you be comfortable using a linear model to predict the personal
     freedom score?
+
+*The relationship is a linear relationship because the points follow a
+straight line pattern *
 
 #### Challenge
 
