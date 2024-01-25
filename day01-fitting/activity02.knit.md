@@ -28,7 +28,8 @@ If you would like to try the *ISLR* labs using these two packages instead of bas
   Be sure to check both your **User Library** and **System Library**.
 - If either of these are not currently listed, type the following in your **Console** pane, replacing `package_name` with the appropriate name, and  press Enter/Return afterwards.
   
-  ```{r install-example, eval = FALSE}
+  
+  ```r
   # Note: the "eval = FALSE" in the above line tells R not to evaluate this code
   install.packages("package_name")
   ```
@@ -36,16 +37,15 @@ If you would like to try the *ISLR* labs using these two packages instead of bas
 - Once you have verified that both `{tidyverse}` and `{tidymodels}` are installed, load these packages in the R chunk below titled `setup`.
   That is, type the following:
   
-  ```{r library-example, eval = FALSE}
+  
+  ```r
   library(tidyverse)
   library(tidymodels)
   ```
   
 - Run the `setup` code chunk and/or **knit** <img src="../README-img/knit-icon.png" alt="knit" width = "20"/> icon your Rmd document to verify that no errors occur.
 
-```{r setup}
 
-```
 
 ![check-in](../README-img/noun-magnifying-glass.png) **Check in**
 
@@ -73,9 +73,7 @@ In the R code chunk below titled `hfi-2016`, type the code that does the followi
 - Filter the data `hfi` data frame for year 2016, and
 - Assigns the result to a data frame named `hfi_2016`.
 
-```{r hfi-2016}
 
-```
 
 ### 1. Identify our research question(s)
 
@@ -97,9 +95,7 @@ Answer the following questions (use your markdown skills) and complete the follo
 - In the R code chunk below titled `univariable-plots`, type the R code that displays this plot for `pf_score`.
 - In the R code chunk below titled `univariable-plots`, type the R code that displays this plot for `pf_expression_control`.
 
-```{r distribution-plots}
 
-```
 
 4. Comment on each of these two distributions. 
   Be sure to describe their centers, spread, shape, and any potential outliers.
@@ -112,9 +108,7 @@ Answer the following questions (use your markdown skills) and complete the follo
 
 - In the R code chunk below titled `relationship-plot`, plot this relationship using the variable `pf_expression_control` as the predictor/explanatory variable.
 
-```{r relationship-plot}
 
-```
 
 4. Does the relationship look linear?
   If you knew a country's `pf_expression_control`, or its score out of 10, with 0 being the most, of political pressures and controls on media content, would you be comfortable using a linear model to predict the personal freedom score?
@@ -129,9 +123,7 @@ You might not know of one for each of those terms.
 What numerical summary would you use to describe the relationship between two numerical variables?
 (hint: explore the `cor` function from Base R)
 
-```{r challenge}
 
-```
 
 
 ### 3. Fit a simple linear regression model
@@ -144,7 +136,8 @@ To begin, we will create a `{parsnip}` specification for a linear model.
 
 - In the code chunk below titled `parsnip-spec`, replace "verbatim" with "r" just before the code chunk title.
 
-```{verbatim parsnip-spec}
+
+```default
 lm_spec <- linear_reg() %>%
   set_mode("regression") %>%
   set_engine("lm")
@@ -166,7 +159,8 @@ Look at your knitted document to see how this syntax appears.
 
 - In the code chunk below titled `fit-lm`, replace "verbatim" with "r" just before the code chunk title. 
 
-```{verbatim fit-lm}
+
+```default
 slr_mod <- lm_spec %>% 
   fit(pf_score ~ pf_expression_control, data = hfi_2016)
 
@@ -201,7 +195,8 @@ We use `glance` from  `{broom}` (which is automatically loaded with `{tidymodels
 
 - In the code chunk below titled `glance-lm`, replace "verbatim" with "r" just before the code chunk title. 
 
-```{verbatim glance-mod}
+
+```default
 glance(slr_mod)
 ```
 
@@ -234,7 +229,8 @@ Now, you will use your training dataset to fit a SLR model.
 
 - In the code chunk below titled `train-fit-lm`, replace "verbatim" with "r" just before the code chunk title and update the data set to your training R object you just created.
 
-```{verbatim train-fit-lm}
+
+```default
 slr_train <- lm_spec %>% 
   fit(pf_score ~ pf_expression_control, data = hfi_2016)
 
@@ -257,7 +253,8 @@ Now we will assess using the testing data set.
 
 - In the code chunk below titled `train-fit-lm`, replace "verbatim" with "r" just before the code chunk title and update `data_test` to whatever R object you assigned your testing data to above.
   
-```{verbatim glance-test}
+
+```default
 test_aug <- augment(slr_train, new_data = data_test)
 test_aug
 ```
@@ -288,7 +285,8 @@ We can use `broom::augment` to calculate these.
 
 - In the code chunk below titled `augment`, replace "verbatim" with "r" just before the code chunk title and update `data_test` to whatever R object you assigned your testing data to above. 
   
-```{verbatim augment}
+
+```default
 train_aug <- augment(slr_train)
 
 train_aug
@@ -300,7 +298,8 @@ We should also verify this condition with a plot of the residuals vs. fitted (pr
 
 - In the code chunk below titled `fitted-residual`, replace "verbatim" with "r" just before the code chunk title. 
   
-```{verbatim fitted-residual}
+
+```default
 ggplot(data = train_aug, aes(x = .fitted, y = .resid)) +
   geom_point() +
   geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
@@ -321,7 +320,8 @@ Answer the following question:
 
 - In the code chunk below titled `residual-histogram`, replace "verbatim" with "r" just before the code chunk title. 
  
-```{verbatim fitted-residuals}
+
+```default
 ggplot(data = train_aug, aes(x = .resid)) +
   geom_histogram(binwidth = 0.25) +
   xlab("Residuals")
