@@ -182,13 +182,14 @@ To begin, we will create a `{parsnip}` specification for a linear model.
 
 - In the code chunk below titled `parsnip-spec`, replace "verbatim" with "r" just before the code chunk title.
 
-```{verbatim parsnip-spec}
+```{r parsnip-spec}
 lm_spec <- linear_reg() %>%
   set_mode("regression") %>%
   set_engine("lm")
 
 lm_spec
 ```
+
 
 Note that the `set_mode("regression")` is really unnecessary/redundant as linear models (`"lm"`) can only be regression models.
 It is better to be explicit as we get comfortable with this new process.
@@ -204,9 +205,9 @@ Look at your knitted document to see how this syntax appears.
 
 - In the code chunk below titled `fit-lm`, replace "verbatim" with "r" just before the code chunk title. 
 
-```{verbatim fit-lm}
+```{r fit-lm}
 slr_mod <- lm_spec %>% 
-  fit(pf_score ~ pf_expression_control, data = hfi_2016)
+  fit(pf_score ~ pf_expression_control, data = data)
 
 tidy(slr_mod)
 ```
@@ -217,6 +218,24 @@ The above code fits our SLR model, then provides a `tidy` parameter estimates ta
   That is, replace "intercept" and "slope" with the appropriate values
 
 $\hat{\texttt{pf\score}} = intercept + slope \times \texttt{pf\_expression\_control}$
+
+```{r tidy-lm}
+tidy_output <- tidy(slr_mod)
+
+intercept_value <- tidy_output$estimate[1]
+slope_value <- tidy_output$estimate[2]
+
+```
+
+
+```{r}
+# Example values (replace with your actual values)
+
+pf_score = intercept_value + slope_value * 0
+
+pf_score
+
+```
 
 
 6. Interpret each of the estimated parameters from (5) in the context of this research question.
@@ -239,7 +258,7 @@ We use `glance` from  `{broom}` (which is automatically loaded with `{tidymodels
 
 - In the code chunk below titled `glance-lm`, replace "verbatim" with "r" just before the code chunk title. 
 
-```{verbatim glance-mod}
+```{r glance-mod}
 glance(slr_mod)
 ```
 
@@ -247,12 +266,12 @@ After doing this and running the code, answer the following questions:
 
 7. What is the value of $R^2$ for this model?
 
-
+*The value of $R^2$ is approximately 0.6342.*
 
 8. What does this value mean in the context of this model?
   Think about what would a "good" value of $R^2$ would be?
   Can/should this value be "perfect"?
-
+*It means that around 63.42% of the variability in the dependent variable is explained by the independent variables included in the model*
 
 
 #### 4.B: Assess with test/train
@@ -272,12 +291,43 @@ Now, you will use your training dataset to fit a SLR model.
 
 - In the code chunk below titled `train-fit-lm`, replace "verbatim" with "r" just before the code chunk title and update the data set to your training R object you just created.
 
-```{verbatim train-fit-lm}
+```{r train-fit-lm}
 slr_train <- lm_spec %>% 
-  fit(pf_score ~ pf_expression_control, data = hfi_2016)
+  fit(pf_score ~ pf_expression_control, data )
 
 tidy(slr_train)
 ```
+```{r lm_spec}
+
+# Load the diamonds dataset
+data(diamonds)
+
+# Set a seed for reproducibility
+set.seed(1)
+
+# Create an initial 80-20 split of the diamonds dataset
+diamonds_split <- initial_split(diamonds, prop = 0.80)
+
+# Assign the two splits to data frames - with descriptive names
+diamonds_train <- training(diamonds_split)
+diamonds_test <- testing(diamonds_split)
+
+```
+
+```{r }
+# Define the linear regression model specification
+lm_spec <- linear_reg() %>%
+  set_engine("lm")
+
+# Fit the simple linear regression model using the training dataset
+slr_train <- lm_spec %>% 
+  fit(price ~ carat, data = diamonds_train)
+
+# Display the model coefficients
+tidy(slr_train)
+
+```
+
 
 Notice that you can reuse the `lm_spec` specification because we are still doing a linear model.
 
@@ -285,19 +335,26 @@ Notice that you can reuse the `lm_spec` specification because we are still doing
   That is, replace "intercept" and "slope" with the appropriate values
 
 $\hat{\texttt{pf\score}} = intercept + slope \times \texttt{pf\_expression\_control}$
+```{r}
+pf_score = -2247.463 + 7736.950 * 0
+pf_score
+```
+
 
 
 10. Interpret each of the estimated parameters from (10) in the context of this research question.
   That is, what do these values represent?
-
+*Intercept-: The intercept is not practically interpretable in this context since it represents the predicted pf_score when carat is zero, which is not meaningful for diamonds.*
+*Slope for the carat variable (7736.950)-:The slope represents the estimated increase in pf_score for each additional carat in a diamond. Specifically, for each added carat, the predicted pf_score is expected to increase by approximately 7736.950 points.*
 
 Now we will assess using the testing data set.
 
 - In the code chunk below titled `train-fit-lm`, replace "verbatim" with "r" just before the code chunk title and update `data_test` to whatever R object you assigned your testing data to above.
   
-```{verbatim glance-test}
-test_aug <- augment(slr_train, new_data = data_test)
+```{r glance-test}
+test_aug <- augment(slr_train, new_data = diamonds_test)
 test_aug
+
 ```
 
 
@@ -313,8 +370,9 @@ The `.fitted` column in this output can also be obtained by using `predict` (i.e
 11. Now, using your responses to (7) and (8) as an example, assess how well your model fits your testing data.
   Compare your results here to your results from your Day 1 of this activity.
   Did this model perform any differently?
+*If the R^2 value from the testing data is similar to the training data (R^2≈0.6342), it suggests that the model generalizes well, and there is no significant overfitting.*
 
-
+*If the R^2 value from the testing data is significantly lower than the training data, it may indicate that the model did not generalize well to new data, and there might be issues such as overfitting.*
 
 ### Model diagnostics
 
@@ -326,10 +384,14 @@ We can use `broom::augment` to calculate these.
 
 - In the code chunk below titled `augment`, replace "verbatim" with "r" just before the code chunk title and update `data_test` to whatever R object you assigned your testing data to above. 
   
-```{verbatim augment}
-train_aug <- augment(slr_train)
+```{r augment}
+# Assuming slr_train is the correct object used to fit the linear regression model
+train_aug <- augment(slr_train, new_data = diamonds_train)
 
+# Display the augmented data frame
 train_aug
+
+
 ```
 
 
@@ -338,13 +400,14 @@ We should also verify this condition with a plot of the residuals vs. fitted (pr
 
 - In the code chunk below titled `fitted-residual`, replace "verbatim" with "r" just before the code chunk title. 
   
-```{verbatim fitted-residual}
-ggplot(data = train_aug, aes(x = .fitted, y = .resid)) +
+```{r fitted-residual}
+ggplot(data = train_aug, aes(x = .pred, y = .resid)) +
   geom_point() +
   geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
   xlab("Fitted values") +
   ylab("Residuals")
 ```
+
 
 Notice here that `train_aug` can also serve as a data set because stored within it are the fitted values ($\hat{y}$) and the residuals.
 Also note that we are getting fancy with the code here.
@@ -359,7 +422,7 @@ Answer the following question:
 
 - In the code chunk below titled `residual-histogram`, replace "verbatim" with "r" just before the code chunk title. 
  
-```{verbatim fitted-residuals}
+```{r fitted-residuals}
 ggplot(data = train_aug, aes(x = .resid)) +
   geom_histogram(binwidth = 0.25) +
   xlab("Residuals")
@@ -369,14 +432,14 @@ Answer the following question:
 
 12. Based on the histogram, does the nearly normal residuals condition appear to be violated?
   Why or why not?
-
+*NO, the histogram is roughly symmetric and bell-shaped, and this suggests that the nearly normal residuals condition is met*
 
 **Constant variability**:
 
 13. Based on the residuals vs. fitted plot, does the constant variability condition appear to be violated?
   Why or why not?
 
-
+*The spread of residuals appears to be fairly consistent as the fitted values change, it suggests that the constant variability condition is met.*
 
 ## Attribution
 

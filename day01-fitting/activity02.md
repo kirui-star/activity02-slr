@@ -280,13 +280,17 @@ To begin, we will create a `{parsnip}` specification for a linear model.
 - In the code chunk below titled `parsnip-spec`, replace “verbatim” with
   “r” just before the code chunk title.
 
-``` default
+``` r
 lm_spec <- linear_reg() %>%
   set_mode("regression") %>%
   set_engine("lm")
 
 lm_spec
 ```
+
+    ## Linear Regression Model Specification (regression)
+    ## 
+    ## Computational engine: lm
 
 Note that the `set_mode("regression")` is really unnecessary/redundant
 as linear models (`"lm"`) can only be regression models. It is better to
@@ -307,12 +311,18 @@ knitted document to see how this syntax appears.
 - In the code chunk below titled `fit-lm`, replace “verbatim” with “r”
   just before the code chunk title.
 
-``` default
+``` r
 slr_mod <- lm_spec %>% 
-  fit(pf_score ~ pf_expression_control, data = hfi_2016)
+  fit(pf_score ~ pf_expression_control, data = data)
 
 tidy(slr_mod)
 ```
+
+    ## # A tibble: 2 × 5
+    ##   term                  estimate std.error statistic   p.value
+    ##   <chr>                    <dbl>     <dbl>     <dbl>     <dbl>
+    ## 1 (Intercept)              4.62     0.0575      80.4 0        
+    ## 2 pf_expression_control    0.491    0.0101      48.8 8.19e-303
 
 The above code fits our SLR model, then provides a `tidy` parameter
 estimates table.
@@ -322,6 +332,23 @@ estimates table.
     appropriate values
 
 $\hat{\texttt{pf\score}} = intercept + slope \times \texttt{pf\_expression\_control}$
+
+``` r
+tidy_output <- tidy(slr_mod)
+
+intercept_value <- tidy_output$estimate[1]
+slope_value <- tidy_output$estimate[2]
+```
+
+``` r
+# Example values (replace with your actual values)
+
+pf_score = intercept_value + slope_value * 5
+
+pf_score
+```
+
+    ## [1] 7.07423
 
 6.  Interpret each of the estimated parameters from (5) in the context
     of this research question. That is, what do these values represent?
